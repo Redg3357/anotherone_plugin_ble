@@ -1,0 +1,22 @@
+{
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "atomic": "cpp",
+        "stack": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "mutex": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "type_traits": "cpp",
+        "limits": "cpp",
+        "tuple": "cpp",
+        "exception": "cpp",
+        "system_error": "cpp",
+        "iostream": "cpp",
+        "functional": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

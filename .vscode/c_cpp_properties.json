@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/kirill/DIPLOM/AuroraOS/mersdk/targets/AuroraOS-4.0.2.303-base-i486.default/opt/cross/include/c++/8.3.0",
+                "/home/kirill/DIPLOM/AuroraOS/mersdk/targets/AuroraOS-4.0.2.303-base-i486.default/usr/include/dbus-1.0",
+                "/home/kirill/DIPLOM/FlutterProjects/anotherone_ble/aurora/libs/simple_bluez_lib/include",
+                "/home/kirill/DIPLOM/AuroraOS/mersdk/targets/AuroraOS-4.0.2.303-base-i486.default/opt/cross/include/c++/8.3.0/i486-meego-linux-gnu",
+                "/home/kirill/DIPLOM/AuroraOS/mersdk/targets/AuroraOS-4.0.2.303-base-i486.default/usr/lib/dbus-1.0/include",
+                "${workspaceFolder}/aurora/**",
+                "${workspaceFolder}/aurora/include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
