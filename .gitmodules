@@ -1,0 +1,7 @@
+[submodule "aurora/3rdparty/SimpleBLE"]
+	path = aurora/3rdparty/SimpleBLE
+	url = https://github.com/OpenBluetoothToolbox/SimpleBLE.git
+
+[submodule "aurora/3rdparty/fmt"]
+	path = aurora/3rdparty/fmt
+	url = https://github.com/fmtlib/fmt.git
