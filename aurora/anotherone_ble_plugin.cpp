@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <simplebluez/Bluez.h>
+
 // //////////////////////////////////////
 // class BluetoothAdapter {
 // public:
@@ -37,14 +38,14 @@
 
 // ///////////////////////////////////////
 
-void BlePluginPcPlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
+void AnotheroneBlePlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
 {
     registrar.RegisterMethodChannel("anotherone_ble",
                                     MethodCodecType::Standard,
                                     [this](const MethodCall &call) { this->onMethodCall(call); });
 }
- 
-void BlePluginPcPlugin::onMethodCall(const MethodCall &call)
+
+void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
 {
     SimpleBluez::Bluez bluez;
     bluez.init();
@@ -59,7 +60,7 @@ void BlePluginPcPlugin::onMethodCall(const MethodCall &call)
     unimplemented(call);
 }
 
-void BlePluginPcPlugin::onGetPlatformVersion(const MethodCall &call)
+void AnotheroneBlePlugin::onGetPlatformVersion(const MethodCall &)
 {
     ////////////////Bluez///////////////
     // BluetoothAdapter adapter;
@@ -74,7 +75,7 @@ void BlePluginPcPlugin::onGetPlatformVersion(const MethodCall &call)
     // call.SendSuccessResponse(version);
 }
 
-void BlePluginPcPlugin::unimplemented(const MethodCall &call)
+void AnotheroneBlePlugin::unimplemented(const MethodCall &call)
 {
     call.SendSuccessResponse(nullptr);
 }
