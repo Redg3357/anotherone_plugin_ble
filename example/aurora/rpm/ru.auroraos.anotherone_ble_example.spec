@@ -11,7 +11,7 @@ Source0: %{name}-%{version}.tar.zst
 BuildRequires: cmake
 BuildRequires: ninja
 BuildRequires: pkgconfig(flutter-embedder)
-
+BuildRequires: pkgconfig(dbus-1)
 
 %description
 %{summary}.
