@@ -7,36 +7,36 @@
 #include <functional>
 #include <simplebluez/Bluez.h>
 
-// //////////////////////////////////////
-// class BluetoothAdapter {
-// public:
-//     BluetoothAdapter() {
-//         m_bluez.init();
-//         if (!m_bluez.get_adapters().empty()) {
-//             m_adapter = m_bluez.get_adapters().at(0);
-//             std::cout << "Adapter info: " << m_adapter->identifier() << " " << m_adapter->address() << std::endl;
-//         }
-//     }
+class BluetoothAdapter {
+public:
+    BluetoothAdapter() {
+        m_bluez.init();
+        if (!m_bluez.get_adapters().empty()) {
+            m_adapter = m_bluez.get_adapters().at(0);
+            std::cout << "Adapter info: " << m_adapter->identifier() << " " << m_adapter->address() << std::endl;
+        }
+    }
 
-//     bool powered() const {
-//         return m_adapter.get() != nullptr && m_adapter->powered();
-//     }
+    bool powered() const {
+        return m_adapter.get() != nullptr && m_adapter->powered();
+    }
 
 
-//     std::string checkPoweredStatus() {
-//         if (powered()) {
-//             return "Bluetooth adapter is powered on.";
-//         } else {
-//             return "Bluetooth adapter is powered off.";
-//         }
-//     }
+    std::string checkPoweredStatus() {
+        if (powered()) {
+            return "Bluetooth adapter is powered on.";
+        } else {
+            return "Bluetooth adapter is powered off.";
+        }
+    }
 
-// private:
-//     SimpleBluez::Bluez m_bluez;
-//     std::shared_ptr<SimpleBluez::Adapter> m_adapter;
-// };
+private:
+    SimpleBluez::Bluez m_bluez;
+    std::shared_ptr<SimpleBluez::Adapter> m_adapter;
+};
 
-// ///////////////////////////////////////
+
+
 
 void AnotheroneBlePlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
 {
@@ -47,8 +47,10 @@ void AnotheroneBlePlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
 
 void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
 {
+
     SimpleBluez::Bluez bluez;
     bluez.init();
+
 
     const auto &method = call.GetMethod();
 
@@ -60,19 +62,18 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     unimplemented(call);
 }
 
-void AnotheroneBlePlugin::onGetPlatformVersion(const MethodCall &)
+void AnotheroneBlePlugin::onGetPlatformVersion(const MethodCall &call)
 {
-    ////////////////Bluez///////////////
-    // BluetoothAdapter adapter;
-    // std::string version = adapter.checkPoweredStatus();
-    ///////////////////////////////
-    // utsname uname_data{};
-    // uname(&uname_data);
+    //utsname uname_data{};
+    //uname(&uname_data);
 
-    // std::string preamble = "Aurora (Linux): ";
-    // std::string version = preamble + uname_data.version;
+    //std::string preamble = "Aurora (Linux): ";
+    //std::string version = preamble + uname_data.version;
 
-    // call.SendSuccessResponse(version);
+    BluetoothAdapter adapter;
+    std::string version = adapter.checkPoweredStatus();
+
+    call.SendSuccessResponse(version);
 }
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)
