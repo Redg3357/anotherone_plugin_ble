@@ -21,12 +21,23 @@ public:
         return m_adapter.get() != nullptr && m_adapter->powered();
     }
 
+    bool checkPoweredStatus() {
+        return powered();
+    }
 
-    std::string checkPoweredStatus() {
-        if (powered()) {
-            return "Bluetooth adapter is powered on.";
+     std::string getIdentifier() const {
+        if (m_adapter) {
+            return m_adapter->identifier();
         } else {
-            return "Bluetooth adapter is powered off.";
+            return "not found"; 
+        }
+    }
+
+         std::string getAddress() const {
+        if (m_adapter) {
+            return m_adapter->address();
+        } else {
+            return "not found"; 
         }
     }
 
@@ -47,33 +58,39 @@ void AnotheroneBlePlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
 
 void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
 {
-
-    SimpleBluez::Bluez bluez;
-    bluez.init();
-
+    //SimpleBluez::Bluez bluez;
+    //bluez.init();
 
     const auto &method = call.GetMethod();
 
-    if (method == "getPlatformVersion") {
-        onGetPlatformVersion(call);
+    if (method == "getAdapterPowered") {
+        onGetAdapterPowered(call);
+        return;
+    } else if (method == "getAdapterIdentifier"){
+        onGetAdapterIdentifier(call);
         return;
     }
 
     unimplemented(call);
 }
 
-void AnotheroneBlePlugin::onGetPlatformVersion(const MethodCall &call)
+void AnotheroneBlePlugin::onGetAdapterPowered(const MethodCall &call)
 {
-    //utsname uname_data{};
-    //uname(&uname_data);
-
-    //std::string preamble = "Aurora (Linux): ";
-    //std::string version = preamble + uname_data.version;
-
     BluetoothAdapter adapter;
-    std::string version = adapter.checkPoweredStatus();
+    bool adapterPowered = adapter.checkPoweredStatus();
 
-    call.SendSuccessResponse(version);
+    call.SendSuccessResponse(adapterPowered);
+}
+
+
+void AnotheroneBlePlugin::onGetAdapterIdentifier(const MethodCall &call)
+{
+    BluetoothAdapter adapter;
+    std::string identifier = adapter.getIdentifier();
+    std::string address = adapter.getAddress();
+    std::string identifierAndAddress = identifier + "/" + address;
+    
+    call.SendSuccessResponse(identifierAndAddress);
 }
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)

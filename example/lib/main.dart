@@ -16,7 +16,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  bool _adapterPowered = false;
+  String _adapterIdentifier = "Unknown";
   final _anotheroneBlePlugin = AnotheroneBle();
 
   @override
@@ -27,23 +28,30 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
+    bool adapterPowered;
     try {
-      platformVersion =
-          await _anotheroneBlePlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      adapterPowered = await _anotheroneBlePlugin.getAdapterPowered() ?? false;
+    } catch (e) {
+      adapterPowered = false;
     }
 
+    String adapterIdentifier;
+    try {
+      adapterIdentifier =
+          await _anotheroneBlePlugin.getAdapterIdentifier() ?? 'null';
+    } on PlatformException {
+      adapterIdentifier = 'Failed to get information about identifier.';
+    }
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
-      _platformVersion = platformVersion;
+      _adapterPowered = adapterPowered;
+      _adapterIdentifier = adapterIdentifier;
     });
   }
 
@@ -55,8 +63,13 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Bluetooth adapter powered: $_adapterPowered\n'),
+            Text('Bluetooth adapter identifier: $_adapterIdentifier\n')
+          ],
+        )),
       ),
     );
   }

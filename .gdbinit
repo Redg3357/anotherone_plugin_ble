@@ -1,0 +1,1 @@
+set remote exec-file /usr/bin/ru.auroraos.anotherone_ble_example

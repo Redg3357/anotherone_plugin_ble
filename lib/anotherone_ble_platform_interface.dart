@@ -23,7 +23,12 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<bool?> getAdapterPowered() {
+    throw UnimplementedError('getAdapterPowered() has not been implemented.');
+  }
+
+  Future<String?> getAdapterIdentifier() {
+    throw UnimplementedError(
+        'getAdapterIdentifier() has not been implemented.');
   }
 }

@@ -10,8 +10,16 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   final methodChannel = const MethodChannel('anotherone_ble');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<bool?> getAdapterPowered() async {
+    final adapterPowered =
+        await methodChannel.invokeMethod<bool>('getAdapterPowered');
+    return adapterPowered;
+  }
+
+  @override
+  Future<String?> getAdapterIdentifier() async {
+    final adapterIdentifier =
+        await methodChannel.invokeMethod<String>('getAdapterIdentifier');
+    return adapterIdentifier;
   }
 }
