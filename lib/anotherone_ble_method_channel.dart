@@ -9,6 +9,12 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('anotherone_ble');
 
+  List<String> splitToList(String? splitingString, String splitSymbol) {
+    final splittedList = splitingString!.split(splitSymbol);
+    splittedList.removeWhere((element) => element.isEmpty);
+    return splittedList;
+  }
+
   @override
   Future<bool?> getAdapterPowered() async {
     final adapterPowered =
@@ -21,5 +27,12 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
     final adapterIdentifier =
         await methodChannel.invokeMethod<String>('getAdapterIdentifier');
     return adapterIdentifier;
+  }
+
+    @override
+  Future<List<String>?> getAdaptersList() async {
+    final adaptersListString = await methodChannel.invokeMethod<String>('getAdaptersList');
+    List<String>? adaptersList = splitToList(adaptersListString!,'&');
+    return adaptersList;
   }
 }

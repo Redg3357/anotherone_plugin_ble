@@ -31,4 +31,9 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
     throw UnimplementedError(
         'getAdapterIdentifier() has not been implemented.');
   }
+
+  Future<List<String>?> getAdaptersList() {
+    throw UnimplementedError(
+        'getAdaptersList() has not been implemented.');
+  }
 }

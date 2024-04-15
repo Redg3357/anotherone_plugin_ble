@@ -9,4 +9,7 @@ class AnotheroneBle {
     return AnotheroneBlePlatform.instance.getAdapterIdentifier();
   }
 
+  Future<List<String>?> getAdaptersList() {
+    return AnotheroneBlePlatform.instance.getAdaptersList();
+  }
 }

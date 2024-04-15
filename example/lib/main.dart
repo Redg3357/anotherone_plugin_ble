@@ -18,6 +18,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _adapterPowered = false;
   String _adapterIdentifier = "Unknown";
+  List<String> _adaptersList = ['Unknown adapters1'];
+
   final _anotheroneBlePlugin = AnotheroneBle();
 
   @override
@@ -44,6 +46,15 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException {
       adapterIdentifier = 'Failed to get information about identifier.';
     }
+
+    List<String> adaptersList;
+    try {
+      adaptersList = await _anotheroneBlePlugin.getAdaptersList() ??
+          ['Unknown adapter2222'];
+      //adaptersList = ['Unknown', 'adapter', '2222'];
+    } on PlatformException {
+      adaptersList = ["Failed to get adapters list."];
+    }
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
@@ -52,6 +63,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _adapterPowered = adapterPowered;
       _adapterIdentifier = adapterIdentifier;
+      _adaptersList = adaptersList;
     });
   }
 
@@ -67,7 +79,22 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Bluetooth adapter powered: $_adapterPowered\n'),
-            Text('Bluetooth adapter identifier: $_adapterIdentifier\n')
+            Text('Bluetooth adapter identifier: $_adapterIdentifier\n'),
+            Text('Bluetooth adapters list:',
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: _adaptersList
+                  .map((item) => Text(item,))
+                  .toList(),
+            ),
+            //Column(
+            //  mainAxisAlignment: MainAxisAlignment.start, // Выравнивание элементов по началу столбца
+            //  crossAxisAlignment: CrossAxisAlignment.start,
+            //  children:  _adaptersList.map((adapter){
+            //    return Text(adapter);
+            //  }).toList())
+            //Text('Bluetooth adapters list: ${_adaptersList.join(", ")}\n')
           ],
         )),
       ),
