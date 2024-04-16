@@ -29,10 +29,25 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
     return adapterIdentifier;
   }
 
-    @override
+  @override
   Future<List<String>?> getAdaptersList() async {
-    final adaptersListString = await methodChannel.invokeMethod<String>('getAdaptersList');
-    List<String>? adaptersList = splitToList(adaptersListString!,'&');
+    final adaptersListString =
+        await methodChannel.invokeMethod<String>('getAdaptersList');
+    List<String>? adaptersList = splitToList(adaptersListString!, '&');
     return adaptersList;
   }
+
+  @override
+  Future<List<String>?> getPairedList() async {
+    final pairedListString =
+        await methodChannel.invokeMethod<String>('getPairedList');
+    List<String>? pairedList = splitToList(pairedListString!, '&');
+    return pairedList;
+  }
+
+
+}
+
+class EventChannelAnotheroneBle extends AnotheroneBlePlatform {
+  final eventChannel = const EventChannel('sd');
 }

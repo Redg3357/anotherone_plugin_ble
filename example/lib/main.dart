@@ -16,9 +16,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late Future<void> _changeState;
+
   bool _adapterPowered = false;
   String _adapterIdentifier = "Unknown";
-  List<String> _adaptersList = ['Unknown adapters1'];
+  List<String> _adaptersList = ['Unknown adapters'];
+  List<String> _pairedList = ['Unknown device'];
 
   final _anotheroneBlePlugin = AnotheroneBle();
 
@@ -28,10 +31,11 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
+    getInfo();
+  }
+
+  Future<void> getInfo() async {
     bool adapterPowered;
     try {
       adapterPowered = await _anotheroneBlePlugin.getAdapterPowered() ?? false;
@@ -43,7 +47,7 @@ class _MyAppState extends State<MyApp> {
     try {
       adapterIdentifier =
           await _anotheroneBlePlugin.getAdapterIdentifier() ?? 'null';
-    } on PlatformException {
+    } catch (e) {
       adapterIdentifier = 'Failed to get information about identifier.';
     }
 
@@ -52,9 +56,18 @@ class _MyAppState extends State<MyApp> {
       adaptersList = await _anotheroneBlePlugin.getAdaptersList() ??
           ['Unknown adapter2222'];
       //adaptersList = ['Unknown', 'adapter', '2222'];
-    } on PlatformException {
+    } catch (e) {
       adaptersList = ["Failed to get adapters list."];
     }
+
+    List<String> pairedList;
+    try {
+      pairedList = await _anotheroneBlePlugin.getPairedList() ?? ['Unknown device2222'];
+      //adaptersList = ['Unknown', 'adapter', '2222'];
+    } catch (e) {
+      pairedList = ["Failed to get paired devices."];
+    }
+
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
@@ -64,7 +77,12 @@ class _MyAppState extends State<MyApp> {
       _adapterPowered = adapterPowered;
       _adapterIdentifier = adapterIdentifier;
       _adaptersList = adaptersList;
+      _pairedList = pairedList;
     });
+  }
+
+  Future<void> changePlatformState() async {
+    await getInfo();
   }
 
   @override
@@ -80,12 +98,26 @@ class _MyAppState extends State<MyApp> {
           children: [
             Text('Bluetooth adapter powered: $_adapterPowered\n'),
             Text('Bluetooth adapter identifier: $_adapterIdentifier\n'),
-            Text('Bluetooth adapters list:',
+            Text(
+              'Bluetooth adapters list:',
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: _adaptersList
-                  .map((item) => Text(item,))
+                  .map((item) => Text(
+                        item,
+                      ))
+                  .toList(),
+            ),
+            Text(
+              'Bluetooth paired devices:',
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: _pairedList
+                  .map((item) => Text(
+                        item,
+                      ))
                   .toList(),
             ),
             //Column(
@@ -97,6 +129,16 @@ class _MyAppState extends State<MyApp> {
             //Text('Bluetooth adapters list: ${_adaptersList.join(", ")}\n')
           ],
         )),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.info, color: Colors.black, size: 35),
+          backgroundColor: Colors.white,
+          onPressed: () {
+            setState(() {
+              _changeState = changePlatformState();
+              //getNdef();
+            });
+          },
+        ),
       ),
     );
   }

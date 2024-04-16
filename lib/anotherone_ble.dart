@@ -12,4 +12,14 @@ class AnotheroneBle {
   Future<List<String>?> getAdaptersList() {
     return AnotheroneBlePlatform.instance.getAdaptersList();
   }
+
+  Future<List<String>?> getPairedList() {
+    return AnotheroneBlePlatform.instance.getPairedList();    
+  }
+ 
+
+  Stream<bool?> get getAdapterPoweredUpdate {
+    return AnotheroneBlePlatform.instance.getAdapterPoweredUpdate();
+  }
+
 }

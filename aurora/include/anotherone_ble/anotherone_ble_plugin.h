@@ -14,6 +14,7 @@ private:
     void onGetAdapterPowered(const MethodCall &call);
     void onGetAdapterIdentifier(const MethodCall &call);
     void onGetAdaptersList(const MethodCall &call);
+    void onGetPairedList(const MethodCall &call);  
     void unimplemented(const MethodCall &call);
 };
 
