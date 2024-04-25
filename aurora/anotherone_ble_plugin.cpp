@@ -2,13 +2,32 @@
 #include <flutter/method-channel.h>
 #include <sys/utsname.h>
 
-#include <iostream>
 #include <memory>
 #include <functional>
 #include <simplebluez/Bluez.h>
 #include <vector>
 #include <string>
 #include <sstream>
+#include <atomic>
+#include <chrono>
+#include <thread>
+
+
+SimpleBluez::Bluez bluez;
+
+std::atomic_bool async_thread_active = true;
+void async_thread_function() {
+    while (async_thread_active) {
+        bluez.run_async();
+        std::this_thread::sleep_for(std::chrono::microseconds(100));
+    }
+}
+
+void millisecond_delay(int ms) {
+    for (int i = 0; i < ms; i++) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
 
 
 std::string vectorToString(const std::vector<std::string>& vec, const char delimiter) {
@@ -33,12 +52,12 @@ private:
 
 public:
     BluetoothAdapter() {
-        m_bluez.init();
+        bluez.init();
         //getIdentifier
-        m_adapter = m_bluez.get_adapters().at(0);
+        m_adapter = bluez.get_adapters().at(0);
         std::cout << "Adapter info: " << m_adapter->identifier() << " " << m_adapter->address() << std::endl;
         //getAdapters and Paired List
-        auto adaptersList = m_bluez.get_adapters();
+        auto adaptersList = bluez.get_adapters();
         for (auto& adapter : adaptersList) {
             m_adapters_vector.push_back(adapter->identifier());
 
@@ -50,7 +69,6 @@ public:
 
 
     }
-
 
     bool checkPoweredStatus() {
         return m_adapter.get() != nullptr && m_adapter->powered();
@@ -76,12 +94,23 @@ public:
 
 
 
-
-void AnotheroneBlePlugin::RegisterWithRegistrar(PluginRegistrar &registrar)
+void AnotheroneBlePlugin::RegisterWithRegistrar (PluginRegistrar &registrar)
 {
-    registrar.RegisterMethodChannel("anotherone_ble",
+    registrar.RegisterMethodChannel("anotherone_ble_methods",
                                     MethodCodecType::Standard,
                                     [this](const MethodCall &call) { this->onMethodCall(call); });
+    
+    registrar.RegisterEventChannel("anotherone_ble_event_scanning",
+                                    MethodCodecType::Standard,
+                                    [this](const Encodable &) {
+                                        this->onListen();
+                                        return EventResponse();
+                                    },
+                                    [this](const Encodable &) {
+                                        this->onCancel();
+                                        return EventResponse();
+                                    }
+                                    );
 }
 
 void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
@@ -103,9 +132,51 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "getPairedList"){
         onGetPairedList(call);
         return;
+    }  else if (method == "startScanning"){
+        onStartScanning(call);
+        return;
     }
 
     unimplemented(call);
+}
+
+void AnotheroneBlePlugin::onListen()
+{
+    std::thread* async_thread = new std::thread(async_thread_function);
+
+    auto adapter = bluez.get_adapters().at(0);
+
+    //SimpleBluez::Adapter::DiscoveryFilter filter;
+    //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
+    //adapter->discovery_filter(filter);
+
+
+    adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
+        std::string scannedDevice;
+        scannedDevice = device->address() + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "&";
+        //std::cout << "Update received for " << device->address() std::endl;
+        //std::cout << "\tName " << device->name() << std::endl;
+        //std::cout << "\tRSSI " << std::dec << device->rssi() << std::endl;
+        AnotheroneBlePlugin::sendScannedUpdate(scannedDevice);
+    });
+    
+    adapter->discovery_start();
+    //millisecond_delay(30000);
+    //adapter->discovery_stop();
+//
+    //// Sleep for a bit to allow the adapter to stop discovering.
+    //millisecond_delay(1000);
+//
+    //async_thread_active = false;
+    //while (!async_thread->joinable()) {
+    //    millisecond_delay(10);
+    //}
+    //async_thread->join();
+    //delete async_thread;
+
+}
+
+void AnotheroneBlePlugin::onCancel(){
 }
 
 void AnotheroneBlePlugin::onGetAdapterPowered(const MethodCall &call)
@@ -144,6 +215,16 @@ void AnotheroneBlePlugin::onGetPairedList(const MethodCall &call)
 
     call.SendSuccessResponse(pairedString);
 }
+
+void AnotheroneBlePlugin::onStartScanning(const MethodCall &call)
+{
+    AnotheroneBlePlugin::onListen();
+}
+
+void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
+     EventChannel("anotherone_ble_event_scanning", MethodCodecType::Standard).SendEvent(scannedDevice);
+}
+
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)
 {

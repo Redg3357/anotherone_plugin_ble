@@ -7,8 +7,8 @@ import 'anotherone_ble_platform_interface.dart';
 class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('anotherone_ble');
-
+  final methodChannel = const MethodChannel('anotherone_ble_methods');
+  final eventScanningChannel = const EventChannel('anotherone_ble_event_scanning');
   List<String> splitToList(String? splitingString, String splitSymbol) {
     final splittedList = splitingString!.split(splitSymbol);
     splittedList.removeWhere((element) => element.isEmpty);
@@ -45,9 +45,17 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
     return pairedList;
   }
 
+  @override
+  Future<void> startScanning() async {
+    await methodChannel.invokeMethod<void>('startScanning');
+  }
+  //Stream<List<String>>? _onScanning;
+
+  @override
+  Stream<String?> onScanning() {
+    return eventScanningChannel.receiveBroadcastStream().map((event) => event as String);
+
+  }
 
 }
 
-class EventChannelAnotheroneBle extends AnotheroneBlePlatform {
-  final eventChannel = const EventChannel('sd');
-}

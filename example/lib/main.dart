@@ -23,12 +23,20 @@ class _MyAppState extends State<MyApp> {
   List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
 
-  final _anotheroneBlePlugin = AnotheroneBle();
+  String _scannedDevice = "No scan";
 
+
+  final _anotheroneBlePlugin = AnotheroneBle();
+  StreamSubscription<String?>? _scannedEventSubscription;
   @override
   void initState() {
     super.initState();
     initPlatformState();
+    _scannedEventSubscription = _anotheroneBlePlugin.onScanning().listen((event){
+        setState(() {
+          _scannedDevice = event!;
+        });
+    });
   }
 
   Future<void> initPlatformState() async {
@@ -120,6 +128,9 @@ class _MyAppState extends State<MyApp> {
                       ))
                   .toList(),
             ),
+            Text('Scanning: $_scannedDevice\n'),
+            
+            
             //Column(
             //  mainAxisAlignment: MainAxisAlignment.start, // Выравнивание элементов по началу столбца
             //  crossAxisAlignment: CrossAxisAlignment.start,

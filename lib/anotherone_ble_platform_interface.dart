@@ -42,9 +42,13 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
         'getPairedList() has not been implemented.');
   }
 
+  Future<void> startScanning() {
+    throw UnimplementedError(
+        'startScanning() has not been implemented.');
+  }
 
-  Stream<bool?> getAdapterPoweredUpdate() {
+  Stream<String?>  onScanning() {
         throw UnimplementedError(
-        'getAdapterPoweredUpdate() has not been implemented.');
+        'onScanning() has not been implemented.');
   }
 }

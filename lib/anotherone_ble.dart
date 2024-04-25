@@ -18,8 +18,12 @@ class AnotheroneBle {
   }
  
 
-  Stream<bool?> get getAdapterPoweredUpdate {
-    return AnotheroneBlePlatform.instance.getAdapterPoweredUpdate();
+  Future<void> startScanning() {
+    return AnotheroneBlePlatform.instance.startScanning();    
   }
+ 
 
+  Stream<String?> onScanning() {
+    return AnotheroneBlePlatform.instance.onScanning();
+  }
 }
