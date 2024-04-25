@@ -5,6 +5,10 @@ class AnotheroneBle {
     return AnotheroneBlePlatform.instance.getAdapterPowered();
   }
 
+  Future<bool?> getAdapterDiscovering() {
+    return AnotheroneBlePlatform.instance.getAdapterDiscovering();
+  }
+
   Future<String?> getAdapterIdentifier() {
     return AnotheroneBlePlatform.instance.getAdapterIdentifier();
   }
@@ -20,6 +24,10 @@ class AnotheroneBle {
 
   Future<void> startScanning() {
     return AnotheroneBlePlatform.instance.startScanning();    
+  }
+
+    Future<void> stopScanning() {
+    return AnotheroneBlePlatform.instance.stopScanning();    
   }
  
 

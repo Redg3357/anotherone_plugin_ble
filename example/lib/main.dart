@@ -19,11 +19,12 @@ class _MyAppState extends State<MyApp> {
   late Future<void> _changeState;
 
   bool _adapterPowered = false;
+  bool _adapterDiscovering = false;
   String _adapterIdentifier = "Unknown";
   List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
 
-  String _scannedDevice = "No scan";
+  List<String>  _scannedDevice = ['Unknown scan'];
 
 
   final _anotheroneBlePlugin = AnotheroneBle();
@@ -34,7 +35,7 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
     _scannedEventSubscription = _anotheroneBlePlugin.onScanning().listen((event){
         setState(() {
-          _scannedDevice = event!;
+          _scannedDevice.add(event!);
         });
     });
   }
@@ -50,6 +51,14 @@ class _MyAppState extends State<MyApp> {
     } catch (e) {
       adapterPowered = false;
     }
+
+    bool adapterDiscovering;
+    try {
+      adapterDiscovering = await _anotheroneBlePlugin.getAdapterDiscovering() ?? false;
+    } catch (e) {
+      adapterDiscovering = false;
+    }
+
 
     String adapterIdentifier;
     try {
@@ -83,6 +92,7 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       _adapterPowered = adapterPowered;
+      _adapterDiscovering = adapterDiscovering;
       _adapterIdentifier = adapterIdentifier;
       _adaptersList = adaptersList;
       _pairedList = pairedList;
@@ -100,11 +110,12 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
+        body: SingleChildScrollView(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Bluetooth adapter powered: $_adapterPowered\n'),
+            Text('Bluetooth adapter discovering: $_adapterDiscovering\n'),
             Text('Bluetooth adapter identifier: $_adapterIdentifier\n'),
             Text(
               'Bluetooth adapters list:',
@@ -128,28 +139,45 @@ class _MyAppState extends State<MyApp> {
                       ))
                   .toList(),
             ),
-            Text('Scanning: $_scannedDevice\n'),
-            
-            
-            //Column(
-            //  mainAxisAlignment: MainAxisAlignment.start, // Выравнивание элементов по началу столбца
-            //  crossAxisAlignment: CrossAxisAlignment.start,
-            //  children:  _adaptersList.map((adapter){
-            //    return Text(adapter);
-            //  }).toList())
-            //Text('Bluetooth adapters list: ${_adaptersList.join(", ")}\n')
+            Text('Scanning:',),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: _scannedDevice
+                  .map((item) => Text(
+                        item,
+                      ))
+                  .toList(),
+            ),
+          //  Positioned(
+          //  left: 30,
+          //  bottom: 20,
+          //  child: FloatingActionButton(
+          //    child: Icon(Icons.info, color: Colors.black, size: 35),
+          //    backgroundColor: Colors.white,
+          //    onPressed: () {
+          //      setState(() {
+          //      //_changeState = changePlatformState();
+          //      _anotheroneBlePlugin.stopScanning();
+          //    });
+          //},))
           ],
         )),
+
+
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.info, color: Colors.black, size: 35),
           backgroundColor: Colors.white,
           onPressed: () {
             setState(() {
-              _changeState = changePlatformState();
-              //getNdef();
+            //_changeState = changePlatformState();
+            _anotheroneBlePlugin.stopScanning();
             });
           },
         ),
+        
+        
+
+        
       ),
     );
   }

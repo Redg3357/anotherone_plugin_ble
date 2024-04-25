@@ -14,6 +14,7 @@
 
 
 SimpleBluez::Bluez bluez;
+std::thread* async_thread = nullptr;
 
 std::atomic_bool async_thread_active = true;
 void async_thread_function() {
@@ -42,36 +43,19 @@ std::string vectorToString(const std::vector<std::string>& vec, const char delim
     return oss.str();
 }
 
-class BluetoothAdapter {
-private:
-    SimpleBluez::Bluez m_bluez;
-    std::shared_ptr<SimpleBluez::Adapter> m_adapter;
-    std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;
-    std::vector<std::string> m_adapters_vector;
-    std::vector<std::string> m_paired_vector;
-
+class BluetoothAdapterSingleton {
 public:
-    BluetoothAdapter() {
-        bluez.init();
-        //getIdentifier
-        m_adapter = bluez.get_adapters().at(0);
-        std::cout << "Adapter info: " << m_adapter->identifier() << " " << m_adapter->address() << std::endl;
-        //getAdapters and Paired List
-        auto adaptersList = bluez.get_adapters();
-        for (auto& adapter : adaptersList) {
-            m_adapters_vector.push_back(adapter->identifier());
-
-            auto paired_list = adapter->device_paired_get();
-            for (auto& device : paired_list) {
-                m_paired_vector.push_back(device->name()+ '/' + device->address());
-            }
-        }
-
-
+    static BluetoothAdapterSingleton& getInstance() {
+        static BluetoothAdapterSingleton instance;
+        return instance;
     }
 
     bool checkPoweredStatus() {
-        return m_adapter.get() != nullptr && m_adapter->powered();
+        return m_adapter->powered();
+    }
+
+    bool checkAdapterDiscovering() {
+        return m_adapter->discovering();
     }
 
     std::string getIdentifier() const {
@@ -90,7 +74,88 @@ public:
     std::vector<std::string> getPaired() const{
         return m_paired_vector;
     }
+
+    
+
+private:
+    // Приватный конструктор и деструктор, чтобы предотвратить создание экземпляров вне класса
+    BluetoothAdapterSingleton() {
+        bluez.init();
+        m_adapter = bluez.get_adapters().at(0);
+
+        auto adaptersList = bluez.get_adapters();
+        for (auto& adapter : adaptersList) {
+            m_adapters_vector.push_back(adapter->identifier());
+
+            auto paired_list = adapter->device_paired_get();
+            for (auto& device : paired_list) {
+                m_paired_vector.push_back(device->name()+ '/' + device->address());
+            }
+        }
+    }
+    ~BluetoothAdapterSingleton() {}
+
+    // Запрещаем копирование и присваивание
+    BluetoothAdapterSingleton(const BluetoothAdapterSingleton&) = delete;
+    BluetoothAdapterSingleton& operator=(const BluetoothAdapterSingleton&) = delete;
+
+    //SimpleBluez::Bluez m_bluez;
+    std::shared_ptr<SimpleBluez::Adapter> m_adapter;
+    std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;
+    std::vector<std::string> m_adapters_vector;
+    std::vector<std::string> m_paired_vector;
+
 };
+
+
+
+
+//class BluetoothAdapter {
+//private:
+//    SimpleBluez::Bluez m_bluez;
+//    std::shared_ptr<SimpleBluez::Adapter> m_adapter;
+//    std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;
+//    std::vector<std::string> m_adapters_vector;
+//    std::vector<std::string> m_paired_vector;
+//
+//public:
+//    BluetoothAdapter() {
+//        bluez.init();
+//        //getIdentifier
+//        m_adapter = bluez.get_adapters().at(0);
+//
+//        auto adaptersList = bluez.get_adapters();
+//        for (auto& adapter : adaptersList) {
+//            m_adapters_vector.push_back(adapter->identifier());
+//
+//            auto paired_list = adapter->device_paired_get();
+//            for (auto& device : paired_list) {
+//                m_paired_vector.push_back(device->name()+ '/' + device->address());
+//            }
+//        }
+//    }
+//
+//    bool checkPoweredStatus() {
+//        return m_adapter.get() != nullptr && m_adapter->powered();
+//    }
+//
+//    std::string getIdentifier() const {
+//        return m_adapter->identifier();
+//    }
+//
+//    std::string getAddress() const {
+//       
+//        return m_adapter->address();
+//    }
+// 
+//    std::vector<std::string> getAdapters() const{
+//        return m_adapters_vector;
+//    }
+//
+//    std::vector<std::string> getPaired() const{
+//        return m_paired_vector;
+//    }
+//};
 
 
 
@@ -132,17 +197,26 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "getPairedList"){
         onGetPairedList(call);
         return;
-    }  else if (method == "startScanning"){
+    } else if (method == "startScanning"){
         onStartScanning(call);
         return;
-    }
+    } else if (method == "getAdapterDiscovering"){
+        onGetAdapterDiscovering(call);
+        return;
+    } else if (method == "stopScanning"){
+        onStopScanning(call);
+        return;
+    } 
+    
+    
 
     unimplemented(call);
 }
 
 void AnotheroneBlePlugin::onListen()
 {
-    std::thread* async_thread = new std::thread(async_thread_function);
+    
+    async_thread = new std::thread(async_thread_function);
 
     auto adapter = bluez.get_adapters().at(0);
 
@@ -177,20 +251,39 @@ void AnotheroneBlePlugin::onListen()
 }
 
 void AnotheroneBlePlugin::onCancel(){
+    auto adapter = bluez.get_adapters().at(0);
+    adapter->discovery_stop();
+    millisecond_delay(1000);
+
+    //while (!async_thread->joinable()) {
+    //    millisecond_delay(10);
+    //}
+
+    async_thread->join();
+    delete async_thread;
+    async_thread_active = false;
 }
 
 void AnotheroneBlePlugin::onGetAdapterPowered(const MethodCall &call)
 {
-    BluetoothAdapter adapter;
+    BluetoothAdapterSingleton& adapter = BluetoothAdapterSingleton::getInstance();
     bool adapterPowered = adapter.checkPoweredStatus();
 
     call.SendSuccessResponse(adapterPowered);
 }
 
+void AnotheroneBlePlugin::onGetAdapterDiscovering(const MethodCall &call)
+{
+    BluetoothAdapterSingleton& adapter = BluetoothAdapterSingleton::getInstance();
+    bool adapterDiscovering = adapter.checkAdapterDiscovering();
+
+    call.SendSuccessResponse(adapterDiscovering);
+}
+
 
 void AnotheroneBlePlugin::onGetAdapterIdentifier(const MethodCall &call)
 {
-    BluetoothAdapter adapter;
+    BluetoothAdapterSingleton& adapter = BluetoothAdapterSingleton::getInstance();
     std::string identifier = adapter.getIdentifier();
     std::string address = adapter.getAddress();
     std::string identifierAndAddress = identifier + "/" + address;
@@ -200,7 +293,7 @@ void AnotheroneBlePlugin::onGetAdapterIdentifier(const MethodCall &call)
 
 void AnotheroneBlePlugin::onGetAdaptersList(const MethodCall &call)
 {
-    BluetoothAdapter adapter;
+    BluetoothAdapterSingleton& adapter = BluetoothAdapterSingleton::getInstance();
     std::vector<std::string> m_adapters_vector = adapter.getAdapters();
     std::string adaptersString =  vectorToString(m_adapters_vector, '&');
 
@@ -209,7 +302,7 @@ void AnotheroneBlePlugin::onGetAdaptersList(const MethodCall &call)
 
 void AnotheroneBlePlugin::onGetPairedList(const MethodCall &call)
 {
-    BluetoothAdapter adapter;
+    BluetoothAdapterSingleton& adapter = BluetoothAdapterSingleton::getInstance();
     std::vector<std::string> m_paired_vector = adapter.getPaired();
     std::string pairedString =  vectorToString(m_paired_vector, '&');
 
@@ -220,6 +313,12 @@ void AnotheroneBlePlugin::onStartScanning(const MethodCall &call)
 {
     AnotheroneBlePlugin::onListen();
 }
+
+void AnotheroneBlePlugin::onStopScanning(const MethodCall &call)
+{
+    AnotheroneBlePlugin::onCancel();
+}
+
 
 void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
      EventChannel("anotherone_ble_event_scanning", MethodCodecType::Standard).SendEvent(scannedDevice);

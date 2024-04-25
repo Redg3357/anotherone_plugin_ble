@@ -23,6 +23,15 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   }
 
   @override
+  Future<bool?> getAdapterDiscovering() async {
+    final adapterDiscovering =
+        await methodChannel.invokeMethod<bool>('getAdapterDiscovering');
+    return adapterDiscovering;
+  }
+
+
+
+  @override
   Future<String?> getAdapterIdentifier() async {
     final adapterIdentifier =
         await methodChannel.invokeMethod<String>('getAdapterIdentifier');
@@ -48,6 +57,11 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   @override
   Future<void> startScanning() async {
     await methodChannel.invokeMethod<void>('startScanning');
+  }
+
+    @override
+  Future<void> stopScanning() async {
+    await methodChannel.invokeMethod<void>('stopScanning');
   }
   //Stream<List<String>>? _onScanning;
 

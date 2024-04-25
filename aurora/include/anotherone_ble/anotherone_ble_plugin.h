@@ -14,11 +14,13 @@ public:
 private:
     void onMethodCall(const MethodCall &call);
     void onGetAdapterPowered(const MethodCall &call);
+    void onGetAdapterDiscovering(const MethodCall &call);  
     void onGetAdapterIdentifier(const MethodCall &call);
     void onGetAdaptersList(const MethodCall &call);
     void onGetPairedList(const MethodCall &call);  
     void unimplemented(const MethodCall &call);
-    void onStartScanning(const MethodCall &call); 
+    void onStartScanning(const MethodCall &call);
+    void onStopScanning(const MethodCall &call);
 
 
     void onListen();

@@ -27,6 +27,10 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
     throw UnimplementedError('getAdapterPowered() has not been implemented.');
   }
 
+    Future<bool?> getAdapterDiscovering() {
+    throw UnimplementedError('getAdapterDiscovering() has not been implemented.');
+  }
+
   Future<String?> getAdapterIdentifier() {
     throw UnimplementedError(
         'getAdapterIdentifier() has not been implemented.');
@@ -43,6 +47,11 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
   }
 
   Future<void> startScanning() {
+    throw UnimplementedError(
+        'startScanning() has not been implemented.');
+  }
+
+  Future<void> stopScanning() {
     throw UnimplementedError(
         'startScanning() has not been implemented.');
   }
