@@ -26,7 +26,7 @@ class AnotheroneBle {
     return AnotheroneBlePlatform.instance.startScanning();    
   }
 
-    Future<void> stopScanning() {
+  Future<void> stopScanning() {
     return AnotheroneBlePlatform.instance.stopScanning();    
   }
  

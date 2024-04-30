@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
   bool _adapterPowered = false;
   bool _adapterDiscovering = false;
   String _adapterIdentifier = "Unknown";
-  List<String> _adaptersList = ['Unknown adapters'];
+  //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
 
   List<String>  _scannedDevice = ['Unknown scan'];
@@ -68,14 +68,14 @@ class _MyAppState extends State<MyApp> {
       adapterIdentifier = 'Failed to get information about identifier.';
     }
 
-    List<String> adaptersList;
-    try {
-      adaptersList = await _anotheroneBlePlugin.getAdaptersList() ??
-          ['Unknown adapter2222'];
-      //adaptersList = ['Unknown', 'adapter', '2222'];
-    } catch (e) {
-      adaptersList = ["Failed to get adapters list."];
-    }
+    //List<String> adaptersList;
+    //try {
+    //  adaptersList = await _anotheroneBlePlugin.getAdaptersList() ??
+    //      ['Unknown adapter2222'];
+    //  //adaptersList = ['Unknown', 'adapter', '2222'];
+    //} catch (e) {
+    //  adaptersList = ["Failed to get adapters list."];
+    //}
 
     List<String> pairedList;
     try {
@@ -94,7 +94,7 @@ class _MyAppState extends State<MyApp> {
       _adapterPowered = adapterPowered;
       _adapterDiscovering = adapterDiscovering;
       _adapterIdentifier = adapterIdentifier;
-      _adaptersList = adaptersList;
+      //_adaptersList = adaptersList;
       _pairedList = pairedList;
     });
   }
@@ -120,14 +120,14 @@ class _MyAppState extends State<MyApp> {
             Text(
               'Bluetooth adapters list:',
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: _adaptersList
-                  .map((item) => Text(
-                        item,
-                      ))
-                  .toList(),
-            ),
+            //Column(
+            //  crossAxisAlignment: CrossAxisAlignment.center,
+            //  children: _adaptersList
+            //      .map((item) => Text(
+            //            item,
+            //          ))
+            //      .toList(),
+            //),
             Text(
               'Bluetooth paired devices:',
             ),
@@ -169,14 +169,11 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: Colors.white,
           onPressed: () {
             setState(() {
-            //_changeState = changePlatformState();
-            _anotheroneBlePlugin.stopScanning();
+            _changeState = changePlatformState();
+            //_anotheroneBlePlugin.stopScanning();
             });
           },
         ),
-        
-        
-
         
       ),
     );
