@@ -55,7 +55,10 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "getPairedList"){
         onGetPairedList(call);
         return;
-    }
+    } else if (method == "stopScanning"){
+        onStopScanning(call);
+        return;
+    } 
 
     unimplemented(call);
 }
@@ -88,28 +91,33 @@ std::string vectorToString(const std::vector<std::string>& vec, const char delim
 
 void AnotheroneBlePlugin::onListen()
 {
-    async_thread_active = true;
-    async_thread = new std::thread([this] { this->async_thread_function(); });
-
-    m_adapter->discovery_start();
-
-    //SimpleBluez::Adapter::DiscoveryFilter filter;
-    //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
-    //adapter->discovery_filter(filter);
+    if(!m_sendEvents){    
+        async_thread_active = true;
+        async_thread = new std::thread([this] { this->async_thread_function(); });
     
-    m_adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
-        std::string scannedDevice;
-        if (device->address())
-        scannedDevice = device->address() + "/" + device->name() + "/" +  std::to_string(device->rssi());
-        //std::cout << "Update received for " << device->address() std::endl;
-        //std::cout << "\tName " << device->name() << std::endl;
-        //std::cout << "\tRSSI " << std::dec << device->rssi() << std::endl;
-        AnotheroneBlePlugin::sendScannedUpdate(scannedDevice);
-    });
+        m_adapter->discovery_start();
+    
+        //SimpleBluez::Adapter::DiscoveryFilter filter;
+        //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
+        //adapter->discovery_filter(filter);
+        
+        m_adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
+        
+            std::string deviceAddress = device->address();
+    
+            auto it = scannedDevices.find(deviceAddress);
+            if (it == scannedDevices.end())
+            {
+                scannedDevices.insert({deviceAddress,device});
+                std::string scannedDevice = deviceAddress + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "&";
+                m_sendEvents = true;
+                AnotheroneBlePlugin::sendScannedUpdate(scannedDevice);
+            } 
+    });}
 }
 
 void AnotheroneBlePlugin::onCancel(){
-
+    m_sendEvents = false;
     m_adapter->discovery_stop();
     millisecond_delay(1000);
 
@@ -117,9 +125,9 @@ void AnotheroneBlePlugin::onCancel(){
         millisecond_delay(10);
     }
 
+    async_thread_active = false;
     async_thread->join();
     delete async_thread;
-    async_thread_active = false;
 }
 
 
@@ -153,8 +161,14 @@ void AnotheroneBlePlugin::onGetPairedList(const MethodCall &call)
     call.SendSuccessResponse(pairedString);
 }
 
+void AnotheroneBlePlugin::onStopScanning(const MethodCall &call)
+{
+    AnotheroneBlePlugin::onCancel();
+}
+
 void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
-     EventChannel("anotherone_ble_event_scanning", MethodCodecType::Standard).SendEvent(scannedDevice);
+    if (m_sendEvents)
+        EventChannel("anotherone_ble_event_scanning", MethodCodecType::Standard).SendEvent(scannedDevice);
 }
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)

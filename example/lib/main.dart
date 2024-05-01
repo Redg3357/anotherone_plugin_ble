@@ -24,8 +24,7 @@ class _MyAppState extends State<MyApp> {
   //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
 
-  List<String>  _scannedDevice = ['Unknown scan'];
-
+  List<String> _scannedDevice = [''];
 
   final _anotheroneBlePlugin = AnotheroneBle();
   StreamSubscription<String?>? _scannedEventSubscription;
@@ -33,11 +32,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    _scannedEventSubscription = _anotheroneBlePlugin.onScanning().listen((event){
-        setState(() {
-          _scannedDevice.add(event!);
-        });
-    });
   }
 
   Future<void> initPlatformState() async {
@@ -54,11 +48,11 @@ class _MyAppState extends State<MyApp> {
 
     bool adapterDiscovering;
     try {
-      adapterDiscovering = await _anotheroneBlePlugin.getAdapterDiscovering() ?? false;
+      adapterDiscovering =
+          await _anotheroneBlePlugin.getAdapterDiscovering() ?? false;
     } catch (e) {
       adapterDiscovering = false;
     }
-
 
     String adapterIdentifier;
     try {
@@ -79,7 +73,8 @@ class _MyAppState extends State<MyApp> {
 
     List<String> pairedList;
     try {
-      pairedList = await _anotheroneBlePlugin.getPairedList() ?? ['Unknown device2222'];
+      pairedList =
+          await _anotheroneBlePlugin.getPairedList() ?? ['Unknown device2222'];
       //adaptersList = ['Unknown', 'adapter', '2222'];
     } catch (e) {
       pairedList = ["Failed to get paired devices."];
@@ -103,6 +98,19 @@ class _MyAppState extends State<MyApp> {
     await getInfo();
   }
 
+  Future<void> startScanning() async {
+    _scannedEventSubscription =
+        _anotheroneBlePlugin.onScanning().listen((event) {
+      setState(() {
+        _scannedDevice.add(event!);
+      });
+    });
+  }
+
+  Future<void> stopScanning() async {
+    _scannedEventSubscription?.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -114,9 +122,12 @@ class _MyAppState extends State<MyApp> {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Bluetooth adapter powered: $_adapterPowered\n'),
-            Text('Bluetooth adapter discovering: $_adapterDiscovering\n'),
-            Text('Bluetooth adapter identifier: $_adapterIdentifier\n'),
+            Text('Bluetooth adapter powered: $_adapterPowered\n',
+                style: TextStyle(color: Colors.black, fontSize: 10)),
+            Text('Bluetooth adapter discovering: $_adapterDiscovering\n',
+                style: TextStyle(color: Colors.black, fontSize: 10)),
+            Text('Bluetooth adapter identifier: $_adapterIdentifier\n',
+                style: TextStyle(color: Colors.black, fontSize: 10)),
             Text(
               'Bluetooth adapters list:',
             ),
@@ -128,53 +139,60 @@ class _MyAppState extends State<MyApp> {
             //          ))
             //      .toList(),
             //),
-            Text(
-              'Bluetooth paired devices:',
-            ),
+            Text('Bluetooth paired devices:',
+                style: TextStyle(color: Colors.black, fontSize: 10)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: _pairedList
-                  .map((item) => Text(
-                        item,
-                      ))
+                  .map((item) => Text(item,
+                      style: TextStyle(color: Colors.black, fontSize: 10)))
                   .toList(),
             ),
-            Text('Scanning:',),
+            Text('Scanning:',
+                style: TextStyle(color: Colors.black, fontSize: 10)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: _scannedDevice
-                  .map((item) => Text(
-                        item,
-                      ))
+                  .map((item) => Text(item,
+                      style: TextStyle(color: Colors.black, fontSize: 10)))
                   .toList(),
             ),
-          //  Positioned(
-          //  left: 30,
-          //  bottom: 20,
-          //  child: FloatingActionButton(
-          //    child: Icon(Icons.info, color: Colors.black, size: 35),
-          //    backgroundColor: Colors.white,
-          //    onPressed: () {
-          //      setState(() {
-          //      //_changeState = changePlatformState();
-          //      _anotheroneBlePlugin.stopScanning();
-          //    });
-          //},))
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+              ),
+              onPressed: () {
+                setState(() {
+                  //if (!_adapterDiscovering) startScanning();
+                  startScanning();
+                });
+              },
+              child: Text('Start scanning'),
+            ),
+            TextButton(
+              style: ButtonStyle(
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+              ),
+              onPressed: () {
+                setState(() {
+                  changePlatformState();
+                });
+              },
+              child: Text('Update'),
+            )
           ],
         )),
-
-
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.info, color: Colors.black, size: 35),
           backgroundColor: Colors.white,
           onPressed: () {
             setState(() {
-            _changeState = changePlatformState();
-            //_anotheroneBlePlugin.stopScanning();
+              //_changeState = changePlatformState();
+              //_anotheroneBlePlugin.stopScanning();
+              stopScanning();
             });
           },
         ),
-        
       ),
     );
   }

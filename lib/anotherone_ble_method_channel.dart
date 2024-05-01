@@ -15,6 +15,9 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
     return splittedList;
   }
 
+  
+
+
   @override
   Future<bool?> getAdapterPowered() async {
     final adapterPowered =
