@@ -48,6 +48,7 @@ private:
     
     std::shared_ptr<SimpleBluez::Adapter> m_adapter;
     std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;
+
     std::vector<std::string> m_adapters_vector;
     std::vector<std::string> m_paired_vector;
 

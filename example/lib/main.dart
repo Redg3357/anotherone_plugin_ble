@@ -23,8 +23,7 @@ class _MyAppState extends State<MyApp> {
   String _adapterIdentifier = "Unknown";
   //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
-
-  List<String> _scannedDevice = [''];
+  List<String> _scannedDevice = [];
 
   final _anotheroneBlePlugin = AnotheroneBle();
   StreamSubscription<String?>? _scannedEventSubscription;
@@ -115,6 +114,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Color.fromARGB(255, 111, 228, 202),
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: _scannedDevice
                   .map((item) => Text(item,
-                      style: TextStyle(color: Colors.black, fontSize: 10)))
+                      style: TextStyle(color: Colors.black, fontSize: 8)))
                   .toList(),
             ),
             TextButton(
@@ -175,10 +175,10 @@ class _MyAppState extends State<MyApp> {
               ),
               onPressed: () {
                 setState(() {
-                  changePlatformState();
+                  stopScanning();
                 });
               },
-              child: Text('Update'),
+              child: Text('Stop scanning'),
             )
           ],
         )),
@@ -189,7 +189,7 @@ class _MyAppState extends State<MyApp> {
             setState(() {
               //_changeState = changePlatformState();
               //_anotheroneBlePlugin.stopScanning();
-              stopScanning();
+              changePlatformState();
             });
           },
         ),

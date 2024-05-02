@@ -40,7 +40,6 @@ void AnotheroneBlePlugin::RegisterWithRegistrar (PluginRegistrar &registrar)
 
 void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
 {
-
     const auto &method = call.GetMethod();
 
     if (method == "getAdapterPowered") {
@@ -104,12 +103,13 @@ void AnotheroneBlePlugin::onListen()
         m_adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
         
             std::string deviceAddress = device->address();
-    
+
             auto it = scannedDevices.find(deviceAddress);
             if (it == scannedDevices.end())
             {
+                
                 scannedDevices.insert({deviceAddress,device});
-                std::string scannedDevice = deviceAddress + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "&";
+                std::string scannedDevice = deviceAddress + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "/" + std::to_string(device->paired()) + "/" + std::to_string(device->connected())  + "/" + device->alias(); //+ "/" + std::to_string(device->battery_percentage()); // + "/" + std::to_string(device->battery_percentage()); 
                 m_sendEvents = true;
                 AnotheroneBlePlugin::sendScannedUpdate(scannedDevice);
             } 
