@@ -24,7 +24,8 @@ class _MyAppState extends State<MyApp> {
   //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
   List<String> _scannedDevice = [];
-
+  List<int> _it = [1,2,3,4,5,6];
+ 
   final _anotheroneBlePlugin = AnotheroneBle();
   StreamSubscription<String?>? _scannedEventSubscription;
   @override
@@ -114,20 +115,21 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Color.fromARGB(255, 111, 228, 202),
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
+        backgroundColor: Color.fromARGB(255, 53, 53, 53),
+        appBar: AppBar(backgroundColor: Color.fromARGB(255, 250, 248, 143),
+          title: const Text('Bluetooth plugin example',
+                          style: TextStyle(color: Colors.black),),
         ),
-        body: SingleChildScrollView(
+        body: Center(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Bluetooth adapter powered: $_adapterPowered\n',
-                style: TextStyle(color: Colors.black, fontSize: 10)),
+                style: TextStyle(color: Colors.white, fontSize: 10)),
             Text('Bluetooth adapter discovering: $_adapterDiscovering\n',
-                style: TextStyle(color: Colors.black, fontSize: 10)),
+                style: TextStyle(color: Colors.white, fontSize: 10)),
             Text('Bluetooth adapter identifier: $_adapterIdentifier\n',
-                style: TextStyle(color: Colors.black, fontSize: 10)),
+                style: TextStyle(color: Colors.white, fontSize: 10)),
             Text(
               'Bluetooth adapters list:',
             ),
@@ -140,26 +142,17 @@ class _MyAppState extends State<MyApp> {
             //      .toList(),
             //),
             Text('Bluetooth paired devices:',
-                style: TextStyle(color: Colors.black, fontSize: 10)),
+                style: TextStyle(color: Colors.white, fontSize: 10)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: _pairedList
                   .map((item) => Text(item,
-                      style: TextStyle(color: Colors.black, fontSize: 10)))
-                  .toList(),
-            ),
-            Text('Scanning:',
-                style: TextStyle(color: Colors.black, fontSize: 10)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: _scannedDevice
-                  .map((item) => Text(item,
-                      style: TextStyle(color: Colors.black, fontSize: 8)))
+                      style: TextStyle(color: Colors.white, fontSize: 10)))
                   .toList(),
             ),
             TextButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                foregroundColor: MaterialStateProperty.all<Color>(Color.fromARGB(255, 250, 248, 143)),
               ),
               onPressed: () {
                 setState(() {
@@ -171,7 +164,7 @@ class _MyAppState extends State<MyApp> {
             ),
             TextButton(
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                foregroundColor: MaterialStateProperty.all<Color>(Color.fromARGB(255, 250, 248, 143)),
               ),
               onPressed: () {
                 setState(() {
@@ -179,12 +172,41 @@ class _MyAppState extends State<MyApp> {
                 });
               },
               child: Text('Stop scanning'),
-            )
+            ),
+            Text('Scanning:',
+                style: TextStyle(color: Colors.white, fontSize: 10)),
+            //ListView.builder(
+            //    itemCount: _it.length,
+            //    itemBuilder: (contex, index) {
+            //      return Container(
+            //        height: 20,
+            //        child: Text((_it[index]).toString(),
+            //            style: TextStyle(color: Colors.white, fontSize: 8)),
+            //      );
+            //    }),
+            Column(
+              //crossAxisAlignment: CrossAxisAlignment.center,
+              children: _scannedDevice
+                  .map((item) => SizedBox(
+                    height: 15,
+                    child: TextButton(onPressed: (){},
+                            child:Text(
+                            item,
+                            style: TextStyle(color: Color.fromARGB(255, 250, 248, 143), fontSize: 8)))
+                  )).toList()
+                  
+                  //TextButton(onPressed: (){}, 
+                  //  child: Text(
+                  //    item,
+                  //      style: TextStyle(color: Color.fromARGB(255, 250, 248, 143), fontSize: 8))
+                  //  )
+                  //).toList(),
+            ),
           ],
         )),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.info, color: Colors.black, size: 35),
-          backgroundColor: Colors.white,
+          child: Icon(Icons.info, color: Colors.white, size: 35),
+          backgroundColor: Colors.black,
           onPressed: () {
             setState(() {
               //_changeState = changePlatformState();
