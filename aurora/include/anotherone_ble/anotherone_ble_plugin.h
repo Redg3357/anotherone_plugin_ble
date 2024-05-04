@@ -38,6 +38,8 @@ private:
     void unimplemented(const MethodCall &call);
     void onStartScanning(const MethodCall &call);
     void onStopScanning(const MethodCall &call);
+    void onDeviceConnect(const MethodCall &call);
+
 
     void onListen();
     void onCancel();

@@ -1,3 +1,4 @@
+import 'package:anotherone_ble/anotherone_ble_method_channel.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -23,11 +24,11 @@ class _MyAppState extends State<MyApp> {
   String _adapterIdentifier = "Unknown";
   //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
-  List<String> _scannedDevice = [];
-  List<int> _it = [1,2,3,4,5,6];
- 
+  List<BluetoothDevice> _scannedDevice = [];
+  List<int> _it = [1, 2, 3, 4, 5, 6];
+
   final _anotheroneBlePlugin = AnotheroneBle();
-  StreamSubscription<String?>? _scannedEventSubscription;
+  StreamSubscription<BluetoothDevice?>? _scannedEventSubscription;
   @override
   void initState() {
     super.initState();
@@ -98,6 +99,10 @@ class _MyAppState extends State<MyApp> {
     await getInfo();
   }
 
+  //Future<void> connect(String address) async {
+  //  _anotheroneBlePlugin.deviceConnect(address);
+  //}
+
   Future<void> startScanning() async {
     _scannedEventSubscription =
         _anotheroneBlePlugin.onScanning().listen((event) {
@@ -116,94 +121,109 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Color.fromARGB(255, 53, 53, 53),
-        appBar: AppBar(backgroundColor: Color.fromARGB(255, 250, 248, 143),
-          title: const Text('Bluetooth plugin example',
-                          style: TextStyle(color: Colors.black),),
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 250, 248, 143),
+          title: const Text(
+            'Bluetooth plugin example',
+            style: TextStyle(color: Colors.black),
+          ),
         ),
-        body: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Bluetooth adapter powered: $_adapterPowered\n',
-                style: TextStyle(color: Colors.white, fontSize: 10)),
-            Text('Bluetooth adapter discovering: $_adapterDiscovering\n',
-                style: TextStyle(color: Colors.white, fontSize: 10)),
-            Text('Bluetooth adapter identifier: $_adapterIdentifier\n',
-                style: TextStyle(color: Colors.white, fontSize: 10)),
-            Text(
-              'Bluetooth adapters list:',
-            ),
-            //Column(
-            //  crossAxisAlignment: CrossAxisAlignment.center,
-            //  children: _adaptersList
-            //      .map((item) => Text(
-            //            item,
-            //          ))
-            //      .toList(),
-            //),
-            Text('Bluetooth paired devices:',
-                style: TextStyle(color: Colors.white, fontSize: 10)),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: _pairedList
-                  .map((item) => Text(item,
-                      style: TextStyle(color: Colors.white, fontSize: 10)))
-                  .toList(),
-            ),
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Color.fromARGB(255, 250, 248, 143)),
+        body: ListView(
+            children: [
+          Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+              Text('Bluetooth adapter powered: $_adapterPowered\n',
+                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              Text('Bluetooth adapter discovering: $_adapterDiscovering\n',
+                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              Text('Bluetooth adapter identifier: $_adapterIdentifier\n',
+                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              Text(
+                'Bluetooth adapters list:',
               ),
-              onPressed: () {
-                setState(() {
-                  //if (!_adapterDiscovering) startScanning();
-                  startScanning();
-                });
-              },
-              child: Text('Start scanning'),
-            ),
-            TextButton(
-              style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.all<Color>(Color.fromARGB(255, 250, 248, 143)),
+              //Column(
+              //  crossAxisAlignment: CrossAxisAlignment.center,
+              //  children: _adaptersList
+              //      .map((item) => Text(
+              //            item,
+              //          ))
+              //      .toList(),
+              //),
+              Text('Bluetooth paired devices:',
+                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: _pairedList
+                    .map((item) => Text(item,
+                        style: TextStyle(color: Colors.white, fontSize: 10)))
+                    .toList(),
               ),
-              onPressed: () {
-                setState(() {
-                  stopScanning();
-                });
-              },
-              child: Text('Stop scanning'),
-            ),
-            Text('Scanning:',
-                style: TextStyle(color: Colors.white, fontSize: 10)),
-            //ListView.builder(
-            //    itemCount: _it.length,
-            //    itemBuilder: (contex, index) {
-            //      return Container(
-            //        height: 20,
-            //        child: Text((_it[index]).toString(),
-            //            style: TextStyle(color: Colors.white, fontSize: 8)),
-            //      );
-            //    }),
-            Column(
-              //crossAxisAlignment: CrossAxisAlignment.center,
-              children: _scannedDevice
-                  .map((item) => SizedBox(
-                    height: 15,
-                    child: TextButton(onPressed: (){},
-                            child:Text(
-                            item,
-                            style: TextStyle(color: Color.fromARGB(255, 250, 248, 143), fontSize: 8)))
-                  )).toList()
-                  
-                  //TextButton(onPressed: (){}, 
+              TextButton(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromARGB(255, 250, 248, 143)),
+                ),
+                onPressed: () {
+                  setState(() {
+                    //if (!_adapterDiscovering) startScanning();
+                    startScanning();
+                    changePlatformState();
+                  });
+                },
+                child: Text('Start scanning'),
+              ),
+              TextButton(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      Color.fromARGB(255, 250, 248, 143)),
+                ),
+                onPressed: () {
+                  setState(() {
+                    stopScanning();
+                    changePlatformState();
+                  });
+                },
+                child: Text('Stop scanning'),
+              ),
+              Text('Scanning:',
+                  style: TextStyle(color: Colors.white, fontSize: 10)),
+              //ListView.builder(
+              //    itemCount: _it.length,
+              //    itemBuilder: (contex, index) {
+              //      return Container(
+              //        height: 20,
+              //        child: Text((_it[index]).toString(),
+              //            style: TextStyle(color: Colors.white, fontSize: 8)),
+              //      );
+              //    }),
+              Column(
+                  //crossAxisAlignment: CrossAxisAlignment.center,
+                  children: _scannedDevice
+                      .map((item) => SizedBox(
+                          height: 15,
+                          child: TextButton(
+                              onPressed: () {
+                                changePlatformState();
+                                _anotheroneBlePlugin.deviceConnect('${item.address}');
+                              },
+                              child: Text(
+                                  '${item.address} ${item.name} ${item.rssi} C: ${item.connected} P: ${item.paired} ',
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 250, 248, 143),
+                                      fontSize: 8)))))
+                      .toList()
+          
+                  //TextButton(onPressed: (){},
                   //  child: Text(
                   //    item,
                   //      style: TextStyle(color: Color.fromARGB(255, 250, 248, 143), fontSize: 8))
                   //  )
                   //).toList(),
-            ),
-          ],
-        )),
+                  ),
+            ],
+          ),
+        ]),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.info, color: Colors.white, size: 35),
           backgroundColor: Colors.black,

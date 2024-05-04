@@ -57,6 +57,9 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "stopScanning"){
         onStopScanning(call);
         return;
+    } else if (method == "deviceConnect"){
+        onDeviceConnect(call);
+        return;
     } 
 
     unimplemented(call);
@@ -169,6 +172,14 @@ void AnotheroneBlePlugin::onStopScanning(const MethodCall &call)
 void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
     if (m_sendEvents)
         EventChannel("anotherone_ble_event_scanning", MethodCodecType::Standard).SendEvent(scannedDevice);
+}
+
+void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
+    Encodable::String keyMap = "address";
+    std::string address = call.GetArgument<Encodable::String>(keyMap);
+    //scannedDevices[address].connect();
+    auto device = scannedDevices[address];
+    device->connect();
 }
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)

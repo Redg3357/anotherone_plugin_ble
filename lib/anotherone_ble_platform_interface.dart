@@ -56,8 +56,13 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
         'startScanning() has not been implemented.');
   }
 
-  Stream<String?>  onScanning() {
+  Stream<BluetoothDevice?>  onScanning() {
         throw UnimplementedError(
         'onScanning() has not been implemented.');
+  }
+
+  Future<void> deviceConnect(String address) {
+    throw UnimplementedError(
+        'deviceConnect() has not been implemented.');
   }
 }

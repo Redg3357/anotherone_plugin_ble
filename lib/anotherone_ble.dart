@@ -1,3 +1,5 @@
+import 'package:anotherone_ble/anotherone_ble_method_channel.dart';
+
 import 'anotherone_ble_platform_interface.dart';
 
 class AnotheroneBle {
@@ -21,7 +23,6 @@ class AnotheroneBle {
     return AnotheroneBlePlatform.instance.getPairedList();    
   }
  
-
   Future<void> startScanning() {
     return AnotheroneBlePlatform.instance.startScanning();    
   }
@@ -30,8 +31,12 @@ class AnotheroneBle {
     return AnotheroneBlePlatform.instance.stopScanning();    
   }
  
-
-  Stream<String?> onScanning() {
+  Stream<BluetoothDevice?> onScanning() {
     return AnotheroneBlePlatform.instance.onScanning();
   }
+
+  Future<void> deviceConnect(String address) {
+    return AnotheroneBlePlatform.instance.deviceConnect(address);
+  }
+
 }
