@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include <simplebluez/Bluez.h>
+#include <simplebluez/Exceptions.h>
 #include <vector>
 #include <string>
 #include <sstream>
@@ -14,6 +15,7 @@
 #include <chrono>
 #include <thread>
 #include <map>
+#include <mutex>
 
 class PLUGIN_EXPORT AnotheroneBlePlugin final : public PluginInterface
 {
@@ -47,6 +49,8 @@ private:
     bool m_sendEvents;
 
     std::map<std::string, std::shared_ptr<SimpleBluez::Device>> scannedDevices;
+
+    std::mutex scannedDevicesMutex;
     
     std::shared_ptr<SimpleBluez::Adapter> m_adapter;
     std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;

@@ -168,6 +168,7 @@ class _MyAppState extends State<MyApp> {
                   setState(() {
                     //if (!_adapterDiscovering) startScanning();
                     startScanning();
+                    print("dart: debug from here");
                     changePlatformState();
                   });
                 },
@@ -180,7 +181,9 @@ class _MyAppState extends State<MyApp> {
                 ),
                 onPressed: () {
                   setState(() {
+                    print("dart: before stop scanning");
                     stopScanning();
+                    print("dart: after stop scanning");
                     changePlatformState();
                   });
                 },

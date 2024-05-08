@@ -93,6 +93,8 @@ std::string vectorToString(const std::vector<std::string>& vec, const char delim
 
 void AnotheroneBlePlugin::onListen()
 {
+ 
+    printf("c++: trying scanning......\n");
     if(!m_sendEvents){    
         async_thread_active = true;
         async_thread = new std::thread([this] { this->async_thread_function(); });
@@ -102,15 +104,17 @@ void AnotheroneBlePlugin::onListen()
         //SimpleBluez::Adapter::DiscoveryFilter filter;
         //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
         //adapter->discovery_filter(filter);
-        
+        printf("c++: continue.....\n");
         m_adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
-        
+            printf("set_on_device_updated\n");
             std::string deviceAddress = device->address();
+
+            //std::lock_guard<std::mutex> lock(scannedDevicesMutex);
 
             auto it = scannedDevices.find(deviceAddress);
             if (it == scannedDevices.end())
             {
-                
+                printf("c++: devivce found " ); 
                 scannedDevices.insert({deviceAddress,device});
                 std::string scannedDevice = deviceAddress + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "/" + std::to_string(device->paired()) + "/" + std::to_string(device->connected())  + "/" + device->alias(); //+ "/" + std::to_string(device->battery_percentage()); // + "/" + std::to_string(device->battery_percentage()); 
                 m_sendEvents = true;
@@ -120,8 +124,11 @@ void AnotheroneBlePlugin::onListen()
 }
 
 void AnotheroneBlePlugin::onCancel(){
+
     m_sendEvents = false;
+    printf("c++: before discovery_stop();");
     m_adapter->discovery_stop();
+    printf("c++: after discovery_stop();");
     millisecond_delay(1000);
 
     while (!async_thread->joinable()) {
@@ -175,11 +182,51 @@ void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
 }
 
 void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
+    
+    bool connectingThreadActive = false;
+    
     Encodable::String keyMap = "address";
     std::string address = call.GetArgument<Encodable::String>(keyMap);
     //scannedDevices[address].connect();
     auto device = scannedDevices[address];
-    device->connect();
+
+    if(!device->connected()){
+        printf("c++: Before starting thread\n");
+        async_thread_active = true;
+        async_thread = new std::thread([this] { this->async_thread_function(); });
+
+        printf("c++: Thread started!\n");
+
+        try {
+            device->connect();
+        } catch (SimpleDBus::Exception::SendFailed& e) {
+                millisecond_delay(100);
+                printf("exception\n");
+        }
+        //printf("c++: Kinda connected!\n");
+
+        if (!device->connected() || !device->services_resolved()) {
+            std::cout << "Failed to connect to " << device->name() << " [" << device->address() << "]"
+                      << std::endl;
+
+        }
+
+        std::cout << !device->services_resolved();
+
+        while (!async_thread->joinable()) {
+            millisecond_delay(10);
+            printf("Not joinable...\n");
+        }
+        printf("Joinable!\n");
+    
+        async_thread_active = false;
+ 
+
+        async_thread->join();
+        printf("c++: Thread joined\n");
+        delete async_thread;  
+        printf("c++: Thread deleted\n"); 
+    }
 }
 
 void AnotheroneBlePlugin::unimplemented(const MethodCall &call)

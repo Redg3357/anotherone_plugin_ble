@@ -5,10 +5,10 @@
             "name": "Attach with GDB",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/kirill/DIPLOM/git/anotherone_plugin_ble/example/build/aurora/psdk_4.0.2.303/aurora-arm/debug/ru.auroraos.anotherone_ble_example",
+            "program": "/home/kirill/DIPLOM/git/anotherone_ble/anotherone_plugin_ble/example/build/aurora/psdk_4.0.2.303/aurora-arm/release/ru.auroraos.anotherone_ble_example",
             "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb-multiarch",
-            "miDebuggerServerAddress": "192.168.1.143:10005",
+            "miDebuggerServerAddress": "192.168.1.143:10009",
             "useExtendedRemote": true,
             "cwd": "${workspaceRoot}",
          }
