@@ -25,18 +25,19 @@ public:
     void sendScannedUpdate(std::string scannedDevice);
 
     std::atomic_bool async_thread_active;
+    std::atomic_bool is_listening;
     std::thread* async_thread;
 
     void async_thread_function();
-
+    ~AnotheroneBlePlugin();
 
 private:
     void onMethodCall(const MethodCall &call);
     void onGetAdapterPowered(const MethodCall &call);
-    void onGetAdapterDiscovering(const MethodCall &call);  
+    void onGetAdapterDiscovering(const MethodCall& call);
     void onGetAdapterIdentifier(const MethodCall &call);
     void onGetAdaptersList(const MethodCall &call);
-    void onGetPairedList(const MethodCall &call);  
+    void onGetPairedList(const MethodCall& call);
     void unimplemented(const MethodCall &call);
     void onStartScanning(const MethodCall &call);
     void onStopScanning(const MethodCall &call);
@@ -51,7 +52,7 @@ private:
     std::map<std::string, std::shared_ptr<SimpleBluez::Device>> scannedDevices;
 
     std::mutex scannedDevicesMutex;
-    
+
     std::shared_ptr<SimpleBluez::Adapter> m_adapter;
     std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;
 

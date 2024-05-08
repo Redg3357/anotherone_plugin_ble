@@ -13,7 +13,8 @@ SimpleBluez::Bluez m_bluez;
 AnotheroneBlePlugin::AnotheroneBlePlugin()
     : m_sendEvents(false),
     async_thread_active(false),
-    async_thread(nullptr)
+    async_thread(nullptr),
+    is_listening(false)
 {
     m_bluez.init();
     m_adapter = m_bluez.get_adapters().at(0);
@@ -24,7 +25,7 @@ void AnotheroneBlePlugin::RegisterWithRegistrar (PluginRegistrar &registrar)
     registrar.RegisterMethodChannel(Channel::Methods,
                                     MethodCodecType::Standard,
                                     [this](const MethodCall &call) { this->onMethodCall(call); });
-    
+
     registrar.RegisterEventChannel(Channel::Event,
                                     MethodCodecType::Standard,
                                     [this](const Encodable &) {
@@ -60,7 +61,7 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "deviceConnect"){
         onDeviceConnect(call);
         return;
-    } 
+    }
 
     unimplemented(call);
 }
@@ -93,14 +94,14 @@ std::string vectorToString(const std::vector<std::string>& vec, const char delim
 
 void AnotheroneBlePlugin::onListen()
 {
- 
+
     printf("c++: trying scanning......\n");
-    if(!m_sendEvents){    
+    if (!m_sendEvents) {
         async_thread_active = true;
-        async_thread = new std::thread([this] { this->async_thread_function(); });
-    
+        async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
+
         m_adapter->discovery_start();
-    
+
         //SimpleBluez::Adapter::DiscoveryFilter filter;
         //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
         //adapter->discovery_filter(filter);
@@ -114,13 +115,15 @@ void AnotheroneBlePlugin::onListen()
             auto it = scannedDevices.find(deviceAddress);
             if (it == scannedDevices.end())
             {
-                printf("c++: devivce found " ); 
+                printf("c++: devivce found ");
                 scannedDevices.insert({deviceAddress,device});
-                std::string scannedDevice = deviceAddress + "/" + device->name() + "/" +  std::to_string(device->rssi()) + "/" + std::to_string(device->paired()) + "/" + std::to_string(device->connected())  + "/" + device->alias(); //+ "/" + std::to_string(device->battery_percentage()); // + "/" + std::to_string(device->battery_percentage()); 
+                std::string scannedDevice = deviceAddress + "/" + device->name() + "/" + std::to_string(device->rssi()) + "/" + std::to_string(device->paired()) + "/" + std::to_string(device->connected()) + "/" + device->alias(); //+ "/" + std::to_string(device->battery_percentage()); // + "/" + std::to_string(device->battery_percentage());
                 m_sendEvents = true;
                 AnotheroneBlePlugin::sendScannedUpdate(scannedDevice);
-            } 
-    });}
+            }
+            });
+        is_listening = true;
+    }
 }
 
 void AnotheroneBlePlugin::onCancel(){
@@ -137,7 +140,8 @@ void AnotheroneBlePlugin::onCancel(){
 
     async_thread_active = false;
     async_thread->join();
-    delete async_thread;
+    delete async_thread; // double free
+    is_listening = false;
 }
 
 
@@ -182,9 +186,9 @@ void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
 }
 
 void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
-    
+
     bool connectingThreadActive = false;
-    
+
     Encodable::String keyMap = "address";
     std::string address = call.GetArgument<Encodable::String>(keyMap);
     //scannedDevices[address].connect();
@@ -192,8 +196,13 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
 
     if(!device->connected()){
         printf("c++: Before starting thread\n");
-        async_thread_active = true;
-        async_thread = new std::thread([this] { this->async_thread_function(); });
+
+        if (not async_thread_active)
+        {
+            async_thread_active = true;
+            async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
+        }
+
 
         printf("c++: Thread started!\n");
 
@@ -218,14 +227,17 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
             printf("Not joinable...\n");
         }
         printf("Joinable!\n");
-    
-        async_thread_active = false;
- 
 
-        async_thread->join();
-        printf("c++: Thread joined\n");
-        delete async_thread;  
-        printf("c++: Thread deleted\n"); 
+
+        if (not is_listening)
+        {
+            async_thread->join();
+            printf("c++: Thread joined\n");
+            delete async_thread;
+            printf("c++: Thread deleted\n");
+            async_thread_active = false;
+        }
+
     }
 }
 
