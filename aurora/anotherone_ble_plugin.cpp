@@ -24,7 +24,7 @@ AnotheroneBlePlugin::~AnotheroneBlePlugin()
 {
     async_thread->join();
     printf("c++: Thread joined\n");
-    delete async_thread;
+    async_thread.reset();
     printf("c++: Thread deleted\n");
     async_thread_active = false;
 }
@@ -106,7 +106,7 @@ void AnotheroneBlePlugin::onListen()
     printf("c++: trying scanning......\n");
     if (!m_sendEvents) {
         async_thread_active = true;
-        async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
+        async_thread = std::make_unique<std::thread>([this] { this->async_thread_function(); }); // dangling pointer
 
         //SimpleBluez::Adapter::DiscoveryFilter filter;
         //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
@@ -141,13 +141,11 @@ void AnotheroneBlePlugin::onCancel(){
     printf("c++: after discovery_stop();");
     millisecond_delay(1000);
 
-    while (!async_thread->joinable()) {
-        millisecond_delay(10);
-    }
-
     async_thread_active = false;
-    async_thread->join();
-    delete async_thread; // double free
+    if (async_thread && async_thread->joinable()) {
+        async_thread->join();
+    }
+    async_thread.reset();
     is_listening = false;
 }
 
@@ -206,7 +204,7 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
         if (not async_thread_active)
         {
             async_thread_active = true;
-            async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
+            async_thread = std::make_unique<std::thread>([this] { this->async_thread_function(); }); // dangling pointer
         }
 
         printf("c++: Thread started!\n");
@@ -234,10 +232,10 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
 
         if (not is_listening)
         {
-            async_thread->join();
-            printf("c++: Thread joined\n");
-            delete async_thread;
-            printf("c++: Thread deleted\n");
+            if (async_thread && async_thread->joinable()) {
+                async_thread->join();
+            }
+            async_thread.reset();
             async_thread_active = false;
         }
     }

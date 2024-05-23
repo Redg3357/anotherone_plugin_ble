@@ -26,7 +26,7 @@ public:
 
     std::atomic_bool async_thread_active;
     std::atomic_bool is_listening;
-    std::thread* async_thread;
+    std::unique_ptr<std::thread> async_thread;
 
     void async_thread_function();
     ~AnotheroneBlePlugin();
