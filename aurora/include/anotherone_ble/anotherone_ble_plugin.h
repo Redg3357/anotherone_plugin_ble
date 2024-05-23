@@ -39,8 +39,8 @@ private:
     void onGetAdaptersList(const MethodCall &call);
     void onGetPairedList(const MethodCall& call);
     void unimplemented(const MethodCall &call);
-    void onStartScanning(const MethodCall &call);
-    void onStopScanning(const MethodCall &call);
+    //void onStartScanning(const MethodCall &call);
+    //void onStopScanning(const MethodCall &call);
     void onDeviceConnect(const MethodCall &call);
 
 
@@ -49,9 +49,10 @@ private:
 
     bool m_sendEvents;
 
+    SimpleBluez::Bluez m_bluez;
+
     std::map<std::string, std::shared_ptr<SimpleBluez::Device>> scannedDevices;
 
-    std::mutex scannedDevicesMutex;
 
     std::shared_ptr<SimpleBluez::Adapter> m_adapter;
     std::vector<std::shared_ptr<SimpleBluez::Adapter>> m_adapters;

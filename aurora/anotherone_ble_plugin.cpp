@@ -8,7 +8,7 @@ namespace Channel {
     constexpr auto Event = "anotherone_ble_event_scanning";
 }
 
-SimpleBluez::Bluez m_bluez;
+//SimpleBluez::Bluez m_bluez;
 
 AnotheroneBlePlugin::AnotheroneBlePlugin()
     : m_sendEvents(false),
@@ -18,6 +18,15 @@ AnotheroneBlePlugin::AnotheroneBlePlugin()
 {
     m_bluez.init();
     m_adapter = m_bluez.get_adapters().at(0);
+}
+
+AnotheroneBlePlugin::~AnotheroneBlePlugin()
+{
+    async_thread->join();
+    printf("c++: Thread joined\n");
+    delete async_thread;
+    printf("c++: Thread deleted\n");
+    async_thread_active = false;
 }
 
 void AnotheroneBlePlugin::RegisterWithRegistrar (PluginRegistrar &registrar)
@@ -55,9 +64,9 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "getPairedList"){
         onGetPairedList(call);
         return;
-    } else if (method == "stopScanning"){
-        onStopScanning(call);
-        return;
+    //} else if (method == "stopScanning"){
+    //    onStopScanning(call);
+    //    return;
     } else if (method == "deviceConnect"){
         onDeviceConnect(call);
         return;
@@ -94,28 +103,26 @@ std::string vectorToString(const std::vector<std::string>& vec, const char delim
 
 void AnotheroneBlePlugin::onListen()
 {
-
     printf("c++: trying scanning......\n");
     if (!m_sendEvents) {
         async_thread_active = true;
         async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
 
-        m_adapter->discovery_start();
-
         //SimpleBluez::Adapter::DiscoveryFilter filter;
         //filter.Transport = SimpleBluez::Adapter::DiscoveryFilter::TransportType::LE;
-        //adapter->discovery_filter(filter);
-        printf("c++: continue.....\n");
+        //filter.RSSI = -10;
+        //m_adapter->discovery_filter(filter);
+
+        m_adapter->discovery_start();
+
         m_adapter->set_on_device_updated([&](std::shared_ptr<SimpleBluez::Device> device) {
             printf("set_on_device_updated\n");
             std::string deviceAddress = device->address();
 
-            //std::lock_guard<std::mutex> lock(scannedDevicesMutex);
 
             auto it = scannedDevices.find(deviceAddress);
             if (it == scannedDevices.end())
             {
-                printf("c++: devivce found ");
                 scannedDevices.insert({deviceAddress,device});
                 std::string scannedDevice = deviceAddress + "/" + device->name() + "/" + std::to_string(device->rssi()) + "/" + std::to_string(device->paired()) + "/" + std::to_string(device->connected()) + "/" + device->alias(); //+ "/" + std::to_string(device->battery_percentage()); // + "/" + std::to_string(device->battery_percentage());
                 m_sendEvents = true;
@@ -143,7 +150,6 @@ void AnotheroneBlePlugin::onCancel(){
     delete async_thread; // double free
     is_listening = false;
 }
-
 
 void AnotheroneBlePlugin::onGetAdapterPowered(const MethodCall &call)
 {
@@ -175,10 +181,10 @@ void AnotheroneBlePlugin::onGetPairedList(const MethodCall &call)
     call.SendSuccessResponse(pairedString);
 }
 
-void AnotheroneBlePlugin::onStopScanning(const MethodCall &call)
-{
-    AnotheroneBlePlugin::onCancel();
-}
+//void AnotheroneBlePlugin::onStopScanning(const MethodCall &call)
+//{
+//    AnotheroneBlePlugin::onCancel();
+//}
 
 void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
     if (m_sendEvents)
@@ -187,7 +193,7 @@ void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
 
 void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
 
-    bool connectingThreadActive = false;
+    //bool connectingThreadActive = false;
 
     Encodable::String keyMap = "address";
     std::string address = call.GetArgument<Encodable::String>(keyMap);
@@ -203,7 +209,6 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
             async_thread = new std::thread([this] { this->async_thread_function(); }); // dangling pointer
         }
 
-
         printf("c++: Thread started!\n");
 
         try {
@@ -217,7 +222,6 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
         if (!device->connected() || !device->services_resolved()) {
             std::cout << "Failed to connect to " << device->name() << " [" << device->address() << "]"
                       << std::endl;
-
         }
 
         std::cout << !device->services_resolved();
@@ -228,7 +232,6 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
         }
         printf("Joinable!\n");
 
-
         if (not is_listening)
         {
             async_thread->join();
@@ -237,7 +240,6 @@ void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
             printf("c++: Thread deleted\n");
             async_thread_active = false;
         }
-
     }
 }
 

@@ -23,10 +23,7 @@ class BluetoothDevice {
                         properties[4] == '1' ? true : false,
                         properties[5] );
   }
-
- 
 }
-
 
 /// An implementation of [AnotheroneBlePlatform] that uses method channels.
 class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
