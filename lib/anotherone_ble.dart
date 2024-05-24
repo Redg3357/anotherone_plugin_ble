@@ -1,6 +1,7 @@
 import 'package:anotherone_ble/anotherone_ble_method_channel.dart';
 
 import 'anotherone_ble_platform_interface.dart';
+import 'modules/device.dart';
 
 class AnotheroneBle {
   Future<bool?> getAdapterPowered() {
@@ -38,5 +39,4 @@ class AnotheroneBle {
   Future<void> deviceConnect(String address) {
     return AnotheroneBlePlatform.instance.deviceConnect(address);
   }
-
 }

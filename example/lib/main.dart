@@ -2,6 +2,7 @@ import 'package:anotherone_ble/anotherone_ble_method_channel.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:anotherone_ble/modules/device.dart';
 import 'package:flutter/services.dart';
 import 'package:anotherone_ble/anotherone_ble.dart';
 

@@ -191,45 +191,24 @@ void AnotheroneBlePlugin::sendScannedUpdate(std::string scannedDevice){
 
 void AnotheroneBlePlugin::onDeviceConnect(const MethodCall &call){
 
-    //bool connectingThreadActive = false;
-
     Encodable::String keyMap = "address";
     std::string address = call.GetArgument<Encodable::String>(keyMap);
-    //scannedDevices[address].connect();
+
     auto device = scannedDevices[address];
 
     if(!device->connected()){
-        printf("c++: Before starting thread\n");
-
         if (not async_thread_active)
         {
             async_thread_active = true;
             async_thread = std::make_unique<std::thread>([this] { this->async_thread_function(); }); // dangling pointer
         }
 
-        printf("c++: Thread started!\n");
-
         try {
             device->connect();
         } catch (SimpleDBus::Exception::SendFailed& e) {
-                millisecond_delay(100);
-                printf("exception\n");
+                millisecond_delay(100);     
         }
-        //printf("c++: Kinda connected!\n");
-
-        if (!device->connected() || !device->services_resolved()) {
-            std::cout << "Failed to connect to " << device->name() << " [" << device->address() << "]"
-                      << std::endl;
-        }
-
-        std::cout << !device->services_resolved();
-
-        while (!async_thread->joinable()) {
-            millisecond_delay(10);
-            printf("Not joinable...\n");
-        }
-        printf("Joinable!\n");
-
+      
         if (not is_listening)
         {
             if (async_thread && async_thread->joinable()) {

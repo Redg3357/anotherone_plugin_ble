@@ -1,5 +1,7 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
+import 'modules/device.dart';
+
 import 'anotherone_ble_method_channel.dart';
 
 abstract class AnotheroneBlePlatform extends PlatformInterface {
