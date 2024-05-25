@@ -60,6 +60,11 @@ class MethodChannelAnotheroneBle extends AnotheroneBlePlatform {
   }
 
     @override
+  Future<void> clearScanned() async {
+    await methodChannel.invokeMethod<void>('clearScanned');
+  }
+
+    @override
   Future<void> stopScanning() async {
     await methodChannel.invokeMethod<void>('stopScanning');
   }

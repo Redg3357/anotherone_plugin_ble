@@ -70,6 +70,9 @@ void AnotheroneBlePlugin::onMethodCall(const MethodCall &call)
     } else if (method == "deviceConnect"){
         onDeviceConnect(call);
         return;
+    } else if (method == "clearScanned"){
+        onClearScanned(call);
+        return;
     }
 
     unimplemented(call);
@@ -147,6 +150,11 @@ void AnotheroneBlePlugin::onCancel(){
     }
     async_thread.reset();
     is_listening = false;
+    scannedDevices.clear();
+}
+
+void AnotheroneBlePlugin::onClearScanned(const MethodCall &call){
+    scannedDevices.clear();
 }
 
 void AnotheroneBlePlugin::onGetAdapterPowered(const MethodCall &call)
@@ -172,7 +180,7 @@ void AnotheroneBlePlugin::onGetPairedList(const MethodCall &call)
     m_paired_vector.clear();
     auto paired_list = m_adapter->device_paired_get();
     for (auto& device : paired_list) {
-        m_paired_vector.push_back(device->name()+ '/' + device->address());
+        m_paired_vector.push_back(device->address() + " - " +  device->name());
     }
 
     std::string pairedString =  vectorToString(m_paired_vector, '&');

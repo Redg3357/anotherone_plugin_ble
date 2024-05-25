@@ -31,6 +31,10 @@ class AnotheroneBle {
   Future<void> stopScanning() {
     return AnotheroneBlePlatform.instance.stopScanning();    
   }
+
+  Future<void> clearScanned() {
+    return AnotheroneBlePlatform.instance.clearScanned();    
+  }
  
   Stream<BluetoothDevice?> onScanning() {
     return AnotheroneBlePlatform.instance.onScanning();

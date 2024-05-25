@@ -53,6 +53,11 @@ abstract class AnotheroneBlePlatform extends PlatformInterface {
         'startScanning() has not been implemented.');
   }
 
+  Future<void> clearScanned() {
+    throw UnimplementedError(
+        'startScanning() has not been implemented.');
+  }
+
   Future<void> stopScanning() {
     throw UnimplementedError(
         'startScanning() has not been implemented.');

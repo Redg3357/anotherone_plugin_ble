@@ -23,13 +23,12 @@ class _MyAppState extends State<MyApp> {
   bool _adapterPowered = false;
   bool _adapterDiscovering = false;
   String _adapterIdentifier = "Unknown";
-  //List<String> _adaptersList = ['Unknown adapters'];
   List<String> _pairedList = ['Unknown device'];
   List<BluetoothDevice> _scannedDevice = [];
-  List<int> _it = [1, 2, 3, 4, 5, 6];
 
   final _anotheroneBlePlugin = AnotheroneBle();
   StreamSubscription<BluetoothDevice?>? _scannedEventSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -64,34 +63,20 @@ class _MyAppState extends State<MyApp> {
       adapterIdentifier = 'Failed to get information about identifier.';
     }
 
-    //List<String> adaptersList;
-    //try {
-    //  adaptersList = await _anotheroneBlePlugin.getAdaptersList() ??
-    //      ['Unknown adapter2222'];
-    //  //adaptersList = ['Unknown', 'adapter', '2222'];
-    //} catch (e) {
-    //  adaptersList = ["Failed to get adapters list."];
-    //}
-
     List<String> pairedList;
     try {
       pairedList =
-          await _anotheroneBlePlugin.getPairedList() ?? ['Unknown device2222'];
-      //adaptersList = ['Unknown', 'adapter', '2222'];
+          await _anotheroneBlePlugin.getPairedList() ?? ['Unknown device'];
     } catch (e) {
       pairedList = ["Failed to get paired devices."];
     }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
 
     setState(() {
       _adapterPowered = adapterPowered;
       _adapterDiscovering = adapterDiscovering;
       _adapterIdentifier = adapterIdentifier;
-      //_adaptersList = adaptersList;
       _pairedList = pairedList;
     });
   }
@@ -99,10 +84,6 @@ class _MyAppState extends State<MyApp> {
   Future<void> changePlatformState() async {
     await getInfo();
   }
-
-  //Future<void> connect(String address) async {
-  //  _anotheroneBlePlugin.deviceConnect(address);
-  //}
 
   Future<void> startScanning() async {
     _scannedEventSubscription =
@@ -117,6 +98,13 @@ class _MyAppState extends State<MyApp> {
     _scannedEventSubscription?.cancel();
   }
 
+  Future<void> clearScanned() async {
+    _anotheroneBlePlugin.clearScanned();
+    setState(() {
+      _scannedDevice = []; 
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -124,120 +112,135 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: Color.fromARGB(255, 53, 53, 53),
         appBar: AppBar(
           backgroundColor: Color.fromARGB(255, 250, 248, 143),
-          title: const Text(
-            'Bluetooth plugin example',
-            style: TextStyle(color: Colors.black),
+          title: const Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              'Bluetooth Scanner Demo',
+              style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
-        body: ListView(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              Text('Bluetooth adapter powered: $_adapterPowered\n',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
-              Text('Bluetooth adapter discovering: $_adapterDiscovering\n',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
-              Text('Bluetooth adapter identifier: $_adapterIdentifier\n',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
-              Text(
-                'Bluetooth adapters list:',
-              ),
-              //Column(
-              //  crossAxisAlignment: CrossAxisAlignment.center,
-              //  children: _adaptersList
-              //      .map((item) => Text(
-              //            item,
-              //          ))
-              //      .toList(),
-              //),
-              Text('Bluetooth paired devices:',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: _pairedList
-                    .map((item) => Text(item,
-                        style: TextStyle(color: Colors.white, fontSize: 10)))
-                    .toList(),
-              ),
-              TextButton(
-                style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all<Color>(
-                      Color.fromARGB(255, 250, 248, 143)),
+              Text('Bluetooth включен: $_adapterPowered',
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+              Text('Адрес устройства: $_adapterIdentifier',
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+              Text('Запущено сканирование: $_adapterDiscovering',
+                  style: TextStyle(color: Colors.white, fontSize: 16)),
+              Divider(color: Colors.white),
+              Text('Сопряженные устройства:',
+                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _pairedList.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        _pairedList[index],
+                        style: TextStyle(color: Colors.white, fontSize: 13),
+                      ),
+                    );
+                  },
                 ),
-                onPressed: () {
-                  setState(() {
-                    //if (!_adapterDiscovering) startScanning();
-                    startScanning();
-                    print("dart: debug from here");
-                    changePlatformState();
-                  });
-                },
-                child: Text('Start scanning'),
               ),
-              TextButton(
-                style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all<Color>(
-                      Color.fromARGB(255, 250, 248, 143)),
-                ),
-                onPressed: () {
-                  setState(() {
-                    print("dart: before stop scanning");
-                    stopScanning();
-                    print("dart: after stop scanning");
-                    changePlatformState();
-                  });
-                },
-                child: Text('Stop scanning'),
-              ),
-              Text('Scanning:',
-                  style: TextStyle(color: Colors.white, fontSize: 10)),
-              //ListView.builder(
-              //    itemCount: _it.length,
-              //    itemBuilder: (contex, index) {
-              //      return Container(
-              //        height: 20,
-              //        child: Text((_it[index]).toString(),
-              //            style: TextStyle(color: Colors.white, fontSize: 8)),
-              //      );
-              //    }),
-              Column(
-                  //crossAxisAlignment: CrossAxisAlignment.center,
-                  children: _scannedDevice
-                      .map((item) => SizedBox(
-                          height: 15,
-                          child: TextButton(
-                              onPressed: () {
-                                changePlatformState();
-                                _anotheroneBlePlugin.deviceConnect('${item.address}');
-                              },
-                              child: Text(
-                                  '${item.address} ${item.name} ${item.rssi} C: ${item.connected} P: ${item.paired} ',
+              Divider(color: Colors.white),
+              Text('Обнаруженные устройства:',
+                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _scannedDevice.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 1.0),
+                      child: Card(
+                        color: Color.fromARGB(255, 53, 53, 53),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.only(left: 2.0),
+                          title: TextButton(
+                            onPressed: () {
+                              _anotheroneBlePlugin
+                                  .deviceConnect(_scannedDevice[index].address);
+                              changePlatformState();
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${_scannedDevice[index].address} ${_scannedDevice[index].name} ${_scannedDevice[index].rssi}',
                                   style: TextStyle(
                                       color: Color.fromARGB(255, 250, 248, 143),
-                                      fontSize: 8)))))
-                      .toList()
-          
-                  //TextButton(onPressed: (){},
-                  //  child: Text(
-                  //    item,
-                  //      style: TextStyle(color: Color.fromARGB(255, 250, 248, 143), fontSize: 8))
-                  //  )
-                  //).toList(),
-                  ),
+                                      fontSize: 13),
+                                ),
+                                Text(
+                                  'Подключено: ${_scannedDevice[index].connected} Сопряжено: ${_scannedDevice[index].paired}',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
-        ]),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.info, color: Colors.white, size: 35),
-          backgroundColor: Colors.black,
-          onPressed: () {
-            setState(() {
-              //_changeState = changePlatformState();
-              //_anotheroneBlePlugin.stopScanning();
-              changePlatformState();
-            });
-          },
+        ),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+               mini: true,
+              child: Icon(Icons.info, color: Color.fromARGB(255, 250, 248, 143), size: 25),
+              backgroundColor: Color.fromARGB(255, 44, 44, 44),
+              onPressed: () {
+                setState(() {
+                  changePlatformState();
+                });
+              },
+            ),
+            SizedBox(height: 10),
+            FloatingActionButton(
+               mini: true,
+              child: Icon(Icons.search, color: Color.fromARGB(255, 250, 248, 143), size: 25),
+              backgroundColor: Color.fromARGB(255, 44, 44, 44),
+              onPressed: () {
+                setState(() {
+                  startScanning();
+                  changePlatformState();
+                });
+              },
+            ),
+            SizedBox(height: 10),
+            FloatingActionButton(
+               mini: true,
+              child: Icon(Icons.stop, color: Color.fromARGB(255, 250, 248, 143), size: 25),
+              backgroundColor: Color.fromARGB(255, 44, 44, 44),
+              onPressed: () {
+                setState(() {
+                  stopScanning();
+                  changePlatformState();
+                });
+              },
+            ),
+            SizedBox(height: 10),
+            FloatingActionButton(
+               mini: true,
+              child: Icon(Icons.delete, color: Color.fromARGB(255, 250, 248, 143), size: 25),
+              backgroundColor: Color.fromARGB(255, 44, 44, 44),
+              onPressed: () {
+                setState(() {
+                  clearScanned();
+                });
+              },
+            ),
+          ],
         ),
       ),
     );

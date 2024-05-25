@@ -42,6 +42,7 @@ private:
     //void onStartScanning(const MethodCall &call);
     //void onStopScanning(const MethodCall &call);
     void onDeviceConnect(const MethodCall &call);
+    void onClearScanned(const MethodCall &call);
 
 
     void onListen();
